@@ -1,8 +1,7 @@
 .PHONY: test lint
 
 test:
-	pytest
+	PYTHONPATH=src python3 -m unittest discover -s tests
 
 lint:
 	ruff check .
-
