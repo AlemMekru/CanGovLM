@@ -1,5 +1,15 @@
 # CanGovLM
 
+# CanGovLM
+
+<p align="center">
+
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Status](https://img.shields.io/badge/status-active-success)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+</p>
+
 CanGovLM is a tiny decoder-only Transformer language model built entirely from scratch using official Canadian government data.
 
 The objective of this project is to understand and implement every core component of a modern language model, including tokenization, data processing, model architecture, training, evaluation, and inference—without using pretrained weights or existing large language models.
@@ -12,13 +22,27 @@ The project is developed incrementally as an educational, research, and portfoli
 - Train exclusively on official Canadian government data.
 - Support English first, followed by bilingual English/French.
 - Maintain a transparent and reproducible training pipeline.
-- Demonstrate end-to-end language model engineering.
+- Demonstrate end-to-end language model engineering.  
+
+
+## Current Status
+
+Current milestone: **Phase 2 – Dataset Engineering**
+
+Completed:
+
+- ✅ Project scaffolding
+- ✅ Byte-level BPE tokenizer
+- ✅ BPE merge learning
+- ✅ Encoding
+- ✅ Decoding
+- ✅ Unit tests
 
 ## Roadmap
 
 - ✅ Project setup
 
-- ⏳ Tokenizer
+- ✅ Tokenizer
 
 - ⏳ Data pipeline
 
@@ -30,7 +54,17 @@ The project is developed incrementally as an educational, research, and portfoli
 
 - ⏳ Inference
 
-- ⏳ Demo
+- ⏳ Demo  
+
+## Features
+
+- Byte-level BPE tokenizer implemented from scratch
+- UTF-8 byte vocabulary
+- Deterministic BPE merge learning
+- Token encoding
+- Token decoding
+- Comprehensive automated tests
+- No pretrained tokenizer libraries
 
 ## Repository Layout
 
