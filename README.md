@@ -99,4 +99,13 @@ The project is developed incrementally as an educational, research, and portfoli
 │   └── training
 └── vocabulary
 
-```
+```  
+
+## Author
+
+**Alem Mekru**
+
+AI Engineer | MSc Artificial Intelligence
+
+- GitHub: https://github.com/AlemMekru
+- LinkedIn: https://www.linkedin.com/in/alemmekru/
