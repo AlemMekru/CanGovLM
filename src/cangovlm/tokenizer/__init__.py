@@ -11,6 +11,7 @@ from cangovlm.tokenizer.bpe import (
 )
 from cangovlm.tokenizer.bytes import text_to_utf8_bytes, utf8_bytes_to_text
 from cangovlm.tokenizer.corpus import iter_corpus_texts, iter_text_files, read_text_file
+from cangovlm.tokenizer.encoding import apply_bpe_merge_rules, encode_text, ordered_merge_rules
 from cangovlm.tokenizer.vocabulary import (
     BOS_TOKEN,
     BYTE_VOCAB_SIZE,
@@ -30,12 +31,15 @@ __all__ = [
     "SPECIAL_TOKENS",
     "ByteVocabulary",
     "BpeMergeRule",
+    "apply_bpe_merge_rules",
     "build_initial_byte_vocabulary",
     "byte_token",
     "count_adjacent_pairs",
+    "encode_text",
     "iter_corpus_texts",
     "iter_text_files",
     "learn_bpe_merge_rules",
+    "ordered_merge_rules",
     "read_text_file",
     "replace_pair",
     "replace_pair_in_sequences",
