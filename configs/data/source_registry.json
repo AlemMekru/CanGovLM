@@ -1,0 +1,79 @@
+{
+  "sources": [
+    {
+      "source_id": "canada_ca",
+      "name": "Canada.ca",
+      "organization": "Government of Canada",
+      "base_url": "https://www.canada.ca/",
+      "languages": ["en", "fr"],
+      "license": {
+        "name": "Government of Canada site terms",
+        "url": "https://www.canada.ca/en/transparency/terms.html"
+      },
+      "document_formats": ["html"],
+      "collection_method": "sitemap",
+      "enabled": true,
+      "notes": "Official federal web content. Collection scope must be narrowed before acquisition."
+    },
+    {
+      "source_id": "justice_laws",
+      "name": "Justice Laws Website",
+      "organization": "Department of Justice Canada",
+      "base_url": "https://laws-lois.justice.gc.ca/",
+      "languages": ["en", "fr"],
+      "license": {
+        "name": "Justice Laws Website terms",
+        "url": "https://laws-lois.justice.gc.ca/eng/ImportantNote"
+      },
+      "document_formats": ["html", "xml", "pdf"],
+      "collection_method": "sitemap",
+      "enabled": true,
+      "notes": "Official acts and regulations. Preserve legal numbering and bilingual provenance."
+    },
+    {
+      "source_id": "statistics_canada",
+      "name": "Statistics Canada",
+      "organization": "Statistics Canada",
+      "base_url": "https://www.statcan.gc.ca/",
+      "languages": ["en", "fr"],
+      "license": {
+        "name": "Statistics Canada terms and conditions",
+        "url": "https://www.statcan.gc.ca/en/reference/terms-conditions"
+      },
+      "document_formats": ["html", "csv", "json", "pdf"],
+      "collection_method": "dataset_catalog",
+      "enabled": true,
+      "notes": "Prefer official text publications and metadata-rich datasets."
+    },
+    {
+      "source_id": "open_government_portal",
+      "name": "Open Government Portal",
+      "organization": "Treasury Board of Canada Secretariat",
+      "base_url": "https://open.canada.ca/",
+      "languages": ["en", "fr"],
+      "license": {
+        "name": "Open Government Licence - Canada",
+        "url": "https://open.canada.ca/en/open-government-licence-canada"
+      },
+      "document_formats": ["html", "csv", "json", "xml", "pdf"],
+      "collection_method": "api",
+      "enabled": true,
+      "notes": "Use dataset-level metadata and license fields during acquisition."
+    },
+    {
+      "source_id": "parliamentary_publications",
+      "name": "Parliamentary Publications",
+      "organization": "Parliament of Canada",
+      "base_url": "https://www.parl.ca/",
+      "languages": ["en", "fr"],
+      "license": {
+        "name": "Parliament of Canada terms and conditions",
+        "url": "https://www.parl.ca/important-notices"
+      },
+      "document_formats": ["html", "pdf", "xml"],
+      "collection_method": "static_url_list",
+      "enabled": false,
+      "notes": "Disabled until collection scope and licensing details are reviewed."
+    }
+  ]
+}
