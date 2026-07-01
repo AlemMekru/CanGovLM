@@ -1,5 +1,24 @@
 """Data pipeline primitives for CanGovLM."""
 
+from cangovlm.data.acquisition import (
+    ACQUIRABLE_DOCUMENT_FORMATS,
+    DOCUMENT_FORMAT_EXTENSIONS,
+    DOCUMENT_ID_HASH_LENGTH,
+    DOCUMENT_ID_PATTERN,
+    AcquisitionClient,
+    AcquisitionError,
+    AcquisitionRequest,
+    DownloadManifestRecord,
+    RawDocument,
+    SourceAcquirer,
+    extension_for_format,
+    raw_storage_path,
+    request_storage_path,
+    sha256_bytes,
+    sha256_file,
+    sha256_text,
+    stable_document_id,
+)
 from cangovlm.data.source_registry import (
     SUPPORTED_COLLECTION_METHODS,
     SUPPORTED_DOCUMENT_FORMATS,
@@ -14,14 +33,31 @@ from cangovlm.data.source_registry import (
 )
 
 __all__ = [
+    "ACQUIRABLE_DOCUMENT_FORMATS",
+    "DOCUMENT_FORMAT_EXTENSIONS",
+    "DOCUMENT_ID_HASH_LENGTH",
+    "DOCUMENT_ID_PATTERN",
     "SUPPORTED_COLLECTION_METHODS",
     "SUPPORTED_DOCUMENT_FORMATS",
     "SUPPORTED_LANGUAGES",
+    "AcquisitionClient",
+    "AcquisitionError",
+    "AcquisitionRequest",
+    "DownloadManifestRecord",
     "OfficialSource",
+    "RawDocument",
     "SourceLicense",
+    "SourceAcquirer",
     "SourceRegistry",
     "SourceRegistryError",
     "SourceValidationError",
+    "extension_for_format",
     "load_source_registry",
+    "raw_storage_path",
+    "request_storage_path",
+    "sha256_bytes",
+    "sha256_file",
+    "sha256_text",
+    "stable_document_id",
     "validate_sources",
 ]
