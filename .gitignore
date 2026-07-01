@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Environments
+.env
+.venv/
+venv/
+env/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Local data and generated ML artifacts
+data/raw/*
+data/interim/*
+data/processed/*
+corpus/en/*
+corpus/fr/*
+vocabulary/*
+checkpoints/*
+artifacts/*
+
+# Keep directory placeholders
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!corpus/en/README.md
+!corpus/fr/README.md
+!vocabulary/README.md
+!checkpoints/README.md
+!artifacts/README.md
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
