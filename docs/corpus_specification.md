@@ -404,7 +404,9 @@ Canonical selection should prefer:
 
 ## 11. Train/Validation/Test Snapshot Strategy
 
-Training must use immutable snapshots, not moving directories.
+Training must use immutable versioned snapshots, not moving directories.
+
+A snapshot is a frozen dataset release. Once created, a snapshot must never be edited in place. New government documents, source corrections, extraction improvements, cleaning changes, deduplication changes, or split changes must create a new snapshot version.
 
 Snapshot directory:
 
@@ -422,6 +424,16 @@ manifest.jsonl
 stats.json
 README.md
 ```
+
+Snapshot immutability rules:
+
+- Do not modify files inside an existing snapshot directory after release.
+- Do not append new documents to an existing snapshot.
+- Do not remove documents from an existing snapshot.
+- Do not regenerate `train.txt`, `validation.txt`, `test.txt`, `manifest.jsonl`, `stats.json`, or `README.md` in place.
+- Do not reuse a snapshot ID for different contents.
+- If a mistake is found, mark the snapshot as superseded in documentation and create a new snapshot.
+- Training runs must reference an explicit snapshot ID, never an implicit "latest" directory.
 
 Split policy:
 
@@ -454,6 +466,38 @@ train.txt / validation.txt / test.txt
 snapshot manifest + stats + README
 ```
 
+Snapshot lifecycle:
+
+```text
+candidate inputs
+        |
+        v
+build candidate snapshot in temporary workspace
+        |
+        v
+validate manifests, hashes, metadata, splits, and stats
+        |
+        v
+publish immutable snapshot directory
+        |
+        v
+use snapshot by explicit version ID
+        |
+        v
+supersede with a new snapshot when data or logic changes
+```
+
+Lifecycle states:
+
+| State | Meaning | Mutation Policy |
+| --- | --- | --- |
+| `candidate` | Snapshot is being assembled in a temporary workspace. | May be regenerated before release. |
+| `published` | Snapshot passed QA and is available for training. | Must not be modified. |
+| `superseded` | A newer snapshot should be used for future training. | Must not be modified. |
+| `rejected` | Candidate failed QA and was not released. | May be deleted from temporary workspace. |
+
+Published snapshot README files must identify the lifecycle state and, if superseded, the replacement snapshot ID.
+
 ## 12. Corpus Versioning Strategy
 
 Corpus versions should identify immutable dataset snapshots.
@@ -471,26 +515,85 @@ v20260701
 v20260815
 ```
 
+If more than one snapshot is created on the same date, append a deterministic sequence suffix:
+
+```text
+v20260701.1
+v20260701.2
+```
+
 Each version must include:
 
+- Snapshot ID.
+- Snapshot lifecycle state.
 - Source catalog version or hash.
 - Pipeline version.
 - Config hashes.
 - Raw manifest hash.
+- Extracted manifest hash.
 - Cleaned manifest hash.
 - Deduplicated manifest hash.
 - Snapshot manifest hash.
+- Split file hashes for `train.txt`, `validation.txt`, and `test.txt`.
 - Creation timestamp.
+- Parent or previous snapshot ID when applicable.
+- Supersedes snapshot ID when applicable.
+- Superseded by snapshot ID when applicable.
 - Human-readable changelog.
 
 Version changes should be created when:
 
+- New government documents are added.
+- Existing source documents are updated upstream and recollected.
 - Sources are added or removed.
 - Collection dates change.
 - Extraction logic changes.
 - Cleaning logic changes.
 - Deduplication logic changes.
 - Train/validation/test split strategy changes.
+- Manifest schema changes.
+- Source licensing or provenance metadata changes.
+
+Snapshot version metadata example:
+
+```json
+{
+  "snapshot_id": "v20260701",
+  "state": "published",
+  "created_at": "2026-07-01T00:00:00Z",
+  "pipeline_version": "0.1.0",
+  "source_catalog_sha256": "example",
+  "raw_manifest_sha256": "example",
+  "extracted_manifest_sha256": "example",
+  "cleaned_manifest_sha256": "example",
+  "deduplicated_manifest_sha256": "example",
+  "snapshot_manifest_sha256": "example",
+  "train_sha256": "example",
+  "validation_sha256": "example",
+  "test_sha256": "example",
+  "previous_snapshot_id": null,
+  "supersedes": null,
+  "superseded_by": null,
+  "changelog": "Initial English corpus snapshot."
+}
+```
+
+Update policy:
+
+```text
+existing snapshot + new documents or changed pipeline logic
+        |
+        v
+new candidate snapshot
+        |
+        v
+QA validation
+        |
+        v
+new published snapshot ID
+```
+
+Existing published snapshots are historical artifacts. They may be referenced, audited, or superseded, but never changed.
 
 ## 13. Quality Assurance Checklist
 
@@ -513,6 +616,11 @@ Before a corpus snapshot can be used for training, verify:
 - Encoding is valid UTF-8.
 - Snapshot README is complete.
 - Snapshot stats are generated.
+- Snapshot ID is unique.
+- Snapshot lifecycle state is documented.
+- Snapshot files have SHA-256 hashes.
+- Snapshot was built in a temporary workspace before publication.
+- No existing published snapshot was modified.
 
 ## 14. Reproducibility Requirements
 
@@ -528,18 +636,35 @@ Required reproducibility artifacts:
 - Processing timestamp.
 - Snapshot README.
 - Snapshot statistics.
+- Snapshot lifecycle metadata.
+- Changelog describing why the snapshot exists.
 
 Every stage should be deterministic for the same inputs and configuration.
+
+Reproducibility rule:
+
+```text
+same source catalog + same raw inputs + same configs + same pipeline version
+        |
+        v
+same manifests + same split files + same snapshot hashes
+```
+
+Any future update command must create a new snapshot rather than modifying an existing one.
 
 Rebuild record example:
 
 ```json
 {
   "snapshot_id": "v20260701",
+  "state": "published",
   "pipeline_version": "0.1.0",
   "source_catalog_sha256": "example",
+  "raw_manifest_sha256": "example",
+  "extracted_manifest_sha256": "example",
   "cleaning_config_sha256": "example",
   "deduplication_config_sha256": "example",
+  "snapshot_manifest_sha256": "example",
   "created_at": "2026-07-01T00:00:00Z"
 }
 ```
@@ -554,6 +679,7 @@ Guidelines:
 - Add new sources through the source catalog, not one-off scripts.
 - Add new file formats through extractor modules with tests.
 - Keep raw files immutable.
+- Keep published snapshots immutable.
 - Preserve backwards compatibility for manifest fields where possible.
 - Version breaking metadata changes.
 - Keep document-level provenance even when chunking text later.
