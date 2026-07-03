@@ -1,4 +1,4 @@
-"""Model configuration primitives for CanGovLM."""
+"""Model primitives for CanGovLM."""
 
 from cangovlm.model.config import (
     DEFAULT_CONTEXT_LENGTH,
@@ -16,6 +16,7 @@ from cangovlm.model.config import (
     validate_transformer_config,
     write_transformer_config,
 )
+from cangovlm.model.embeddings import TokenEmbedding, TokenEmbeddingError
 
 __all__ = [
     "DEFAULT_CONTEXT_LENGTH",
@@ -29,6 +30,8 @@ __all__ = [
     "DEFAULT_WEIGHT_INIT_STD",
     "TransformerConfig",
     "TransformerConfigError",
+    "TokenEmbedding",
+    "TokenEmbeddingError",
     "load_transformer_config",
     "validate_transformer_config",
     "write_transformer_config",

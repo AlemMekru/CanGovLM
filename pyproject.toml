@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "A tiny decoder-only Transformer language model built from scratch using official Canadian government data."
 readme = "README.md"
 requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26",
+]
 license = { file = "LICENSE" }
 authors = [
   { name = "CanGovLM contributors" }
