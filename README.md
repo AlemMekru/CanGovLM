@@ -25,44 +25,50 @@ The project is developed incrementally as an educational, research, and portfoli
 
 ## Current Status
 
-Current milestone: **Phase 2 – Dataset Engineering**
+Current milestone: **Phase 4 – First Production Corpus**
 
 Completed:
 
-- ✅ Project scaffolding
+- ✅ Project foundation
 - ✅ Byte-level BPE tokenizer
 - ✅ BPE merge learning
-- ✅ Encoding
-- ✅ Decoding
-- ✅ Unit tests
+- ✅ Token encoding
+- ✅ Token decoding
+- ✅ Corpus specification
+- ✅ Official source registry
+- ✅ Document acquisition framework
+- ✅ Document manifest framework
+- ✅ Document extraction framework
+- ✅ HTML extractor
+- ✅ End-to-end single-document pipeline
+- ✅ 99 automated tests
 
 ## Roadmap
 
 - ✅ Project setup
-
 - ✅ Tokenizer
-
-- ⏳ Data pipeline
-
+- ✅ Corpus pipeline
+- ⏳ Corpus Snapshot v0.1
 - ⏳ Transformer
-
-- ⏳ Training
-
+- ⏳ Model pretraining
 - ⏳ Evaluation
-
 - ⏳ Inference
-
-- ⏳ Demo  
+- ⏳ Demo
 
 ## Features
 
-- Byte-level BPE tokenizer implemented from scratch
+- Byte-level BPE tokenizer built entirely from scratch
 - UTF-8 byte vocabulary
 - Deterministic BPE merge learning
-- Token encoding
-- Token decoding
-- Comprehensive automated tests
+- Token encoding and decoding
+- Production-style corpus pipeline
+- Official government source registry
+- Immutable corpus snapshots
+- HTML acquisition and extraction pipeline
+- End-to-end acquisition → extraction workflow
+- Comprehensive automated test suite (99+ tests)
 - No pretrained tokenizer libraries
+- No pretrained language model weights
 
 ## Repository Layout
 
@@ -87,31 +93,41 @@ Completed:
 │   └── workflows
 │       └── ci.yml
 ├── .gitignore
-├── .ruff_cache
-│   ├── .gitignore
-│   ├── 0.15.20
-│   │   ├── 16967675455525015189
-│   │   └── 90231062169509730
-│   └── CACHEDIR.TAG
 ├── LICENSE
 ├── Makefile
+├── README.md
 ├── artifacts
+│   └── README.md
 ├── benchmarks
+│   └── README.md
 ├── checkpoints
+│   └── README.md
 ├── configs
 │   ├── data
+│   │   ├── .gitkeep
 │   │   └── source_registry.json
 │   ├── model
+│   │   └── .gitkeep
 │   ├── tokenizer
+│   │   └── .gitkeep
 │   └── training
+│       └── .gitkeep
 ├── corpus
+│   ├── README.md
 │   ├── en
+│   │   └── README.md
 │   └── fr
+│       └── README.md
 ├── data
+│   ├── README.md
 │   ├── interim
+│   │   └── .gitkeep
 │   ├── processed
+│   │   └── .gitkeep
 │   └── raw
+│       └── .gitkeep
 ├── demo
+│   └── README.md
 ├── docs
 │   ├── corpus_specification.md
 │   ├── data_sources.md
@@ -119,17 +135,29 @@ Completed:
 │   ├── experiments.md
 │   └── roadmap.md
 ├── inference
+│   └── README.md
 ├── notebooks
+│   └── README.md
 ├── pyproject.toml
 ├── requirements-dev.txt
 ├── scripts
+│   └── README.md
 ├── src
 │   └── cangovlm
+│       ├── __init__.py
 │       ├── data
+│       │   ├── __init__.py
+│       │   ├── acquisition.py
+│       │   ├── extraction.py
+│       │   ├── manifests.py
+│       │   ├── single_document_pipeline.py
 │       │   └── source_registry.py
 │       ├── evaluation
+│       │   └── __init__.py
 │       ├── model
+│       │   └── __init__.py
 │       ├── tokenizer
+│       │   ├── __init__.py
 │       │   ├── bpe.py
 │       │   ├── bytes.py
 │       │   ├── corpus.py
@@ -137,13 +165,33 @@ Completed:
 │       │   ├── encoding.py
 │       │   └── vocabulary.py
 │       ├── training
+│       │   └── __init__.py
 │       └── utils
+│           └── __init__.py
 ├── tests
+│   ├── __init__.py
 │   ├── data
+│   │   ├── .gitkeep
+│   │   ├── __init__.py
+│   │   ├── test_acquisition.py
+│   │   ├── test_canada_ca_acquisition.py
+│   │   ├── test_extraction.py
+│   │   ├── test_html_extractor.py
+│   │   ├── test_manifests.py
+│   │   ├── test_single_document_pipeline.py
 │   │   └── test_source_registry.py
 │   ├── evaluation
+│   │   └── .gitkeep
+│   ├── fixtures
+│   │   └── html
+│   │       ├── chrome_only.html
+│   │       ├── french_page.html
+│   │       └── official_page.html
 │   ├── model
+│   │   └── .gitkeep
 │   ├── tokenizer
+│   │   ├── .gitkeep
+│   │   ├── __init__.py
 │   │   ├── test_bpe.py
 │   │   ├── test_bytes.py
 │   │   ├── test_corpus.py
@@ -151,9 +199,26 @@ Completed:
 │   │   ├── test_encoding.py
 │   │   └── test_vocabulary.py
 │   └── training
+│       └── .gitkeep
 └── vocabulary
+    └── README.md
 
-```  
+```    
+
+## Latest Release
+
+**v0.3.0 – Corpus Pipeline Foundation**
+
+Highlights:
+
+- Complete byte-level BPE tokenizer
+- Production-ready corpus architecture
+- Source registry
+- Acquisition framework
+- Manifest framework
+- HTML extraction
+- End-to-end single-document pipeline
+
 
 ## Author
 
