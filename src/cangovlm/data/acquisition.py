@@ -13,7 +13,9 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from time import monotonic, sleep
 from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
 from cangovlm.data.source_registry import OfficialSource
 
@@ -29,10 +31,25 @@ DOCUMENT_FORMAT_EXTENSIONS = {
 
 DOCUMENT_ID_HASH_LENGTH = 12
 DOCUMENT_ID_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*_(?:en|fr)_[a-f0-9]{12}$")
+CANADA_CA_SOURCE_ID = "canada_ca"
+CANADA_CA_ROBOTS_URL = "https://www.canada.ca/robots.txt"
+CANADA_CA_TERMS_URL = "https://www.canada.ca/en/transparency/terms.html"
 
 
 class AcquisitionError(ValueError):
     """Base error for acquisition framework validation failures."""
+
+
+class RobotsTxtError(AcquisitionError):
+    """Raised when robots.txt does not permit acquisition."""
+
+
+class TermsNotAcknowledgedError(AcquisitionError):
+    """Raised when source terms have not been explicitly acknowledged."""
+
+
+class TransportError(AcquisitionError):
+    """Raised when an acquisition transport cannot fetch a URL."""
 
 
 class SourceAcquirer(ABC):
@@ -56,6 +73,79 @@ class AcquisitionClient(ABC):
     @abstractmethod
     def acquire(self, request: "AcquisitionRequest") -> "RawDocument":
         """Acquire one raw document for a request."""
+
+
+class HttpTransport(ABC):
+    """Dependency-injected HTTP transport for acquisition clients."""
+
+    @abstractmethod
+    def get(self, url: str, *, headers: dict[str, str] | None = None) -> "HttpResponse":
+        """Return one HTTP response."""
+
+
+@dataclass(frozen=True)
+class HttpResponse:
+    """Raw HTTP response returned by a transport."""
+
+    url: str
+    status_code: int
+    headers: dict[str, str]
+    content: bytes
+
+
+class UrllibHttpTransport(HttpTransport):
+    """Small standard-library HTTP transport."""
+
+    def get(self, url: str, *, headers: dict[str, str] | None = None) -> HttpResponse:
+        request = Request(url, headers=headers or {})
+        try:
+            with urlopen(request) as response:  # noqa: S310 - explicit acquisition transport.
+                response_headers = dict(response.headers.items())
+                return HttpResponse(
+                    url=response.geturl(),
+                    status_code=response.status,
+                    headers=response_headers,
+                    content=response.read(),
+                )
+        except OSError as error:
+            raise TransportError(f"Failed to fetch {url}: {error}") from error
+
+
+@dataclass(frozen=True)
+class RateLimitConfig:
+    """Configurable rate limiting for polite acquisition."""
+
+    min_interval_seconds: float = 1.0
+
+    def __post_init__(self) -> None:
+        if self.min_interval_seconds < 0:
+            raise AcquisitionError("min_interval_seconds must be non-negative.")
+
+
+@dataclass(frozen=True)
+class RetryConfig:
+    """Configurable retry policy with exponential backoff."""
+
+    max_attempts: int = 3
+    initial_backoff_seconds: float = 1.0
+    backoff_multiplier: float = 2.0
+
+    def __post_init__(self) -> None:
+        if self.max_attempts < 1:
+            raise AcquisitionError("max_attempts must be at least 1.")
+        if self.initial_backoff_seconds < 0:
+            raise AcquisitionError("initial_backoff_seconds must be non-negative.")
+        if self.backoff_multiplier < 1:
+            raise AcquisitionError("backoff_multiplier must be at least 1.")
+
+
+@dataclass(frozen=True)
+class StoredRawDocument:
+    """Result of acquiring and storing one immutable raw document."""
+
+    raw_document: "RawDocument"
+    raw_path: Path
+    manifest_record: "DownloadManifestRecord"
 
 
 @dataclass(frozen=True)
@@ -128,6 +218,184 @@ class RawDocument:
         """Raw content size in bytes."""
 
         return len(self.content)
+
+
+class CanadaCaAcquisitionClient(AcquisitionClient):
+    """Acquisition client for approved Canada.ca HTML pages."""
+
+    def __init__(
+        self,
+        *,
+        source: OfficialSource,
+        corpus_root: str | Path,
+        transport: HttpTransport | None = None,
+        rate_limit: RateLimitConfig | None = None,
+        retry: RetryConfig | None = None,
+        terms_acknowledged: bool = False,
+        user_agent: str = "CanGovLM/0.1 (+https://www.canada.ca/)",
+        sleeper=sleep,
+        clock=monotonic,
+    ) -> None:
+        if source.source_id != CANADA_CA_SOURCE_ID:
+            raise AcquisitionError("CanadaCaAcquisitionClient requires the canada_ca source.")
+        if not source.enabled:
+            raise AcquisitionError("Canada.ca source must be enabled before acquisition.")
+        if "html" not in source.document_formats:
+            raise AcquisitionError("Canada.ca source must support html document acquisition.")
+
+        self.source = source
+        self.corpus_root = Path(corpus_root)
+        self.transport = transport or UrllibHttpTransport()
+        self.rate_limit = rate_limit or RateLimitConfig()
+        self.retry = retry or RetryConfig()
+        self.terms_acknowledged = terms_acknowledged
+        self.user_agent = user_agent
+        self._sleeper = sleeper
+        self._clock = clock
+        self._last_request_at: float | None = None
+        self._robots_policy: RobotsPolicy | None = None
+
+    def acquire(self, request: AcquisitionRequest) -> RawDocument:
+        """Acquire one Canada.ca HTML page without storing it."""
+
+        self._validate_request(request)
+        self._ensure_terms_acknowledged()
+        self._ensure_robots_allowed(request.url)
+        response = self._get_with_retries(request.url)
+        self._validate_html_response(response)
+
+        return RawDocument(
+            document_id=request.resolved_document_id(),
+            source_id=request.source_id,
+            url=request.url,
+            canonical_url=request.canonical_url or response.url,
+            language=request.language,
+            document_format="html",
+            content=response.content,
+            retrieved_at=datetime.now(timezone.utc),
+            content_type=_header_value(response.headers, "content-type"),
+            status_code=response.status_code,
+            metadata={
+                "terms_url": self.source.license.url or CANADA_CA_TERMS_URL,
+                "robots_url": CANADA_CA_ROBOTS_URL,
+            },
+        )
+
+    def acquire_and_store(self, request: AcquisitionRequest) -> StoredRawDocument:
+        """Acquire, immutably store, and describe one raw HTML document."""
+
+        raw_document = self.acquire(request)
+        raw_path = raw_storage_path(self.corpus_root, raw_document)
+        write_raw_document(raw_path, raw_document)
+        manifest_record = DownloadManifestRecord.from_raw_document(
+            raw_document,
+            self.source,
+            raw_path=raw_path,
+        )
+        return StoredRawDocument(
+            raw_document=raw_document,
+            raw_path=raw_path,
+            manifest_record=manifest_record,
+        )
+
+    def _validate_request(self, request: AcquisitionRequest) -> None:
+        if request.source_id != CANADA_CA_SOURCE_ID:
+            raise AcquisitionError("Canada.ca client only accepts canada_ca requests.")
+        if request.document_format != "html":
+            raise AcquisitionError("Canada.ca client only downloads HTML pages.")
+        parsed = urlparse(request.url)
+        if parsed.netloc.lower() != "www.canada.ca":
+            raise AcquisitionError("Canada.ca client only accepts www.canada.ca URLs.")
+
+    def _ensure_terms_acknowledged(self) -> None:
+        if not self.terms_acknowledged:
+            raise TermsNotAcknowledgedError(
+                "Canada.ca terms must be acknowledged before acquisition: "
+                f"{self.source.license.url or CANADA_CA_TERMS_URL}"
+            )
+
+    def _ensure_robots_allowed(self, url: str) -> None:
+        policy = self._robots_policy
+        if policy is None:
+            response = self._get_with_retries(CANADA_CA_ROBOTS_URL)
+            policy = RobotsPolicy.from_text(response.content.decode("utf-8", errors="replace"))
+            self._robots_policy = policy
+
+        if not policy.is_allowed(url):
+            raise RobotsTxtError(f"robots.txt disallows acquisition of {url}")
+
+    def _get_with_retries(self, url: str) -> HttpResponse:
+        attempt = 1
+        backoff = self.retry.initial_backoff_seconds
+        while True:
+            self._apply_rate_limit()
+            try:
+                response = self.transport.get(url, headers={"User-Agent": self.user_agent})
+            except TransportError:
+                if attempt >= self.retry.max_attempts:
+                    raise
+                self._sleeper(backoff)
+                backoff *= self.retry.backoff_multiplier
+                attempt += 1
+                continue
+
+            if response.status_code < 500 or attempt >= self.retry.max_attempts:
+                return response
+
+            self._sleeper(backoff)
+            backoff *= self.retry.backoff_multiplier
+            attempt += 1
+
+    def _apply_rate_limit(self) -> None:
+        now = self._clock()
+        if self._last_request_at is not None:
+            elapsed = now - self._last_request_at
+            remaining = self.rate_limit.min_interval_seconds - elapsed
+            if remaining > 0:
+                self._sleeper(remaining)
+                now = self._clock()
+        self._last_request_at = now
+
+    def _validate_html_response(self, response: HttpResponse) -> None:
+        if response.status_code != 200:
+            raise TransportError(f"Canada.ca returned status {response.status_code}.")
+        content_type = _header_value(response.headers, "content-type") or ""
+        if "html" not in content_type.lower():
+            raise TransportError(f"Canada.ca response is not HTML: {content_type!r}.")
+
+
+@dataclass(frozen=True)
+class RobotsPolicy:
+    """Minimal robots.txt policy for User-agent: * disallow rules."""
+
+    disallow_patterns: tuple[str, ...]
+
+    @classmethod
+    def from_text(cls, robots_text: str) -> "RobotsPolicy":
+        patterns: list[str] = []
+        applies_to_all = False
+        tokens = _robots_tokens(robots_text)
+
+        index = 0
+        while index < len(tokens):
+            token = tokens[index]
+            lower = token.lower()
+            if lower == "user-agent:" and index + 1 < len(tokens):
+                applies_to_all = tokens[index + 1] == "*"
+                index += 2
+                continue
+            if lower == "disallow:" and index + 1 < len(tokens):
+                if applies_to_all and tokens[index + 1]:
+                    patterns.append(tokens[index + 1])
+                index += 2
+                continue
+            index += 1
+
+        return cls(disallow_patterns=tuple(patterns))
+
+    def is_allowed(self, url: str) -> bool:
+        path = urlparse(url).path or "/"
+        return not any(_robots_pattern_matches(pattern, path) for pattern in self.disallow_patterns)
 
 
 @dataclass(frozen=True)
@@ -241,6 +509,24 @@ def raw_storage_path(corpus_root: str | Path, raw_document: RawDocument) -> Path
     return Path(corpus_root) / "raw" / raw_document.language / raw_document.source_id / filename
 
 
+def write_raw_document(path: str | Path, raw_document: RawDocument) -> None:
+    """Write raw content immutably.
+
+    Existing files are allowed only when their bytes already match the raw
+    document. Different bytes at the same path indicate an attempted mutation.
+    """
+
+    raw_path = Path(path)
+    if raw_path.exists():
+        existing_sha256 = sha256_file(raw_path)
+        if existing_sha256 != raw_document.sha256:
+            raise AcquisitionError(f"Refusing to overwrite immutable raw file: {raw_path}")
+        return
+
+    raw_path.parent.mkdir(parents=True, exist_ok=True)
+    raw_path.write_bytes(raw_document.content)
+
+
 def request_storage_path(
     corpus_root: str | Path,
     request: AcquisitionRequest,
@@ -288,3 +574,24 @@ def _validate_http_url(value: str, field_name: str) -> None:
     parsed = urlparse(value)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise AcquisitionError(f"{field_name} must be an absolute http(s) URL.")
+
+
+def _header_value(headers: dict[str, str], name: str) -> str | None:
+    lower_name = name.lower()
+    for key, value in headers.items():
+        if key.lower() == lower_name:
+            return value
+    return None
+
+
+def _robots_tokens(robots_text: str) -> list[str]:
+    text_without_comments = []
+    for line in robots_text.splitlines():
+        text_without_comments.append(line.split("#", maxsplit=1)[0])
+    return " ".join(text_without_comments).split()
+
+
+def _robots_pattern_matches(pattern: str, path: str) -> bool:
+    escaped_parts = [re.escape(part) for part in pattern.split("*")]
+    regex = "^" + ".*".join(escaped_parts)
+    return re.match(regex, path) is not None
