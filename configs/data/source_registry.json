@@ -13,7 +13,9 @@
       "document_formats": ["html"],
       "collection_method": "sitemap",
       "enabled": true,
-      "notes": "Official federal web content. Collection scope must be narrowed before acquisition."
+      "collection_date": "2026-07-02",
+      "version_or_snapshot": "initial_source_registry_v20260702",
+      "notes": "Initial approved production source. Official federal web content from Canada.ca; no documents have been downloaded yet."
     },
     {
       "source_id": "justice_laws",
@@ -28,7 +30,9 @@
       "document_formats": ["html", "xml", "pdf"],
       "collection_method": "sitemap",
       "enabled": true,
-      "notes": "Official acts and regulations. Preserve legal numbering and bilingual provenance."
+      "collection_date": "2026-07-02",
+      "version_or_snapshot": "initial_source_registry_v20260702",
+      "notes": "Initial approved production source. Official consolidated Acts and regulations; preserve legal numbering and bilingual provenance. No documents have been downloaded yet."
     },
     {
       "source_id": "statistics_canada",
@@ -43,7 +47,9 @@
       "document_formats": ["html", "csv", "json", "pdf"],
       "collection_method": "dataset_catalog",
       "enabled": true,
-      "notes": "Prefer official text publications and metadata-rich datasets."
+      "collection_date": "2026-07-02",
+      "version_or_snapshot": "initial_source_registry_v20260702",
+      "notes": "Initial approved production source. Prefer official text publications and metadata-rich datasets. No documents have been downloaded yet."
     },
     {
       "source_id": "open_government_portal",
@@ -58,11 +64,13 @@
       "document_formats": ["html", "csv", "json", "xml", "pdf"],
       "collection_method": "api",
       "enabled": true,
-      "notes": "Use dataset-level metadata and license fields during acquisition."
+      "collection_date": "2026-07-02",
+      "version_or_snapshot": "initial_source_registry_v20260702",
+      "notes": "Initial approved production source. Use dataset-level metadata and license fields during acquisition. No documents have been downloaded yet."
     },
     {
-      "source_id": "parliamentary_publications",
-      "name": "Parliamentary Publications",
+      "source_id": "parliament_of_canada",
+      "name": "Parliament of Canada",
       "organization": "Parliament of Canada",
       "base_url": "https://www.parl.ca/",
       "languages": ["en", "fr"],
@@ -72,8 +80,10 @@
       },
       "document_formats": ["html", "pdf", "xml"],
       "collection_method": "static_url_list",
-      "enabled": false,
-      "notes": "Disabled until collection scope and licensing details are reviewed."
+      "enabled": true,
+      "collection_date": "2026-07-02",
+      "version_or_snapshot": "initial_source_registry_v20260702",
+      "notes": "Initial approved production source. Include only official parliamentary publications with documented provenance. No documents have been downloaded yet."
     }
   ]
 }

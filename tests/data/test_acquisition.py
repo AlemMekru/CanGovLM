@@ -163,6 +163,8 @@ def _source(*, source_id: str = "canada_ca") -> OfficialSource:
         document_formats=("html",),
         collection_method="sitemap",
         enabled=True,
+        collection_date="2026-07-02",
+        version_or_snapshot="initial_source_registry_v20260702",
         notes="Official federal web content.",
     )
 

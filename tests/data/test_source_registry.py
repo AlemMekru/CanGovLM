@@ -25,6 +25,7 @@ class SourceRegistryTests(TestCase):
             registry = load_source_registry(path)
 
             self.assertEqual(registry.get("canada_ca").name, "Canada.ca")
+            self.assertEqual(registry.get("canada_ca").collection_date, "2026-07-02")
             self.assertEqual(len(registry.enabled_sources()), 1)
 
     def test_registry_filters_enabled_sources_by_language(self) -> None:
@@ -81,6 +82,16 @@ class SourceRegistryTests(TestCase):
         self.assertIn("base_url must be an absolute http(s) URL", message)
         self.assertIn("unsupported language 'de'", message)
 
+    def test_source_validation_requires_source_catalog_version_metadata(self) -> None:
+        source = _source(collection_date="", version_or_snapshot="")
+
+        with self.assertRaises(SourceValidationError) as context:
+            validate_sources([source])
+
+        message = str(context.exception)
+        self.assertIn("collection_date is required", message)
+        self.assertIn("version_or_snapshot is required", message)
+
     def test_source_validation_rejects_unsupported_document_format(self) -> None:
         source = _source(document_formats=("html", "epub"))
 
@@ -108,8 +119,20 @@ class SourceRegistryTests(TestCase):
     def test_repository_registry_configuration_is_valid(self) -> None:
         registry = load_source_registry("configs/data/source_registry.json")
 
-        self.assertGreaterEqual(len(registry.sources), 5)
-        self.assertTrue(any(source.source_id == "canada_ca" for source in registry.enabled_sources()))
+        self.assertEqual(
+            [source.source_id for source in registry.sources],
+            [
+                "canada_ca",
+                "justice_laws",
+                "statistics_canada",
+                "open_government_portal",
+                "parliament_of_canada",
+            ],
+        )
+        self.assertEqual(len(registry.enabled_sources()), 5)
+        for source in registry.sources:
+            self.assertEqual(source.collection_date, "2026-07-02")
+            self.assertEqual(source.version_or_snapshot, "initial_source_registry_v20260702")
 
 
 def _source(
@@ -120,6 +143,8 @@ def _source(
     document_formats: tuple[str, ...] = ("html",),
     collection_method: str = "sitemap",
     enabled: bool = True,
+    collection_date: str = "2026-07-02",
+    version_or_snapshot: str = "initial_source_registry_v20260702",
 ) -> OfficialSource:
     return OfficialSource(
         source_id=source_id,
@@ -134,6 +159,8 @@ def _source(
         document_formats=document_formats,
         collection_method=collection_method,
         enabled=enabled,
+        collection_date=collection_date,
+        version_or_snapshot=version_or_snapshot,
         notes="Official source registry test fixture.",
     )
 
@@ -152,5 +179,7 @@ def _source_dict(*, source_id: str) -> dict[str, object]:
         "document_formats": ["html"],
         "collection_method": "sitemap",
         "enabled": True,
+        "collection_date": "2026-07-02",
+        "version_or_snapshot": "initial_source_registry_v20260702",
         "notes": "Official source registry test fixture.",
     }

@@ -63,6 +63,8 @@ class OfficialSource:
     document_formats: tuple[str, ...]
     collection_method: str
     enabled: bool
+    collection_date: str
+    version_or_snapshot: str
     notes: str = ""
 
     @classmethod
@@ -88,6 +90,8 @@ class OfficialSource:
             document_formats=_string_tuple(data.get("document_formats")),
             collection_method=str(data.get("collection_method", "")),
             enabled=bool(data.get("enabled", False)),
+            collection_date=str(data.get("collection_date", "")),
+            version_or_snapshot=str(data.get("version_or_snapshot", "")),
             notes=str(data.get("notes", "")),
         )
 
@@ -192,6 +196,10 @@ def _validate_source(source: OfficialSource) -> list[str]:
         errors.append(f"{prefix}: license.name is required.")
     if source.license.url is not None and not _is_valid_http_url(source.license.url):
         errors.append(f"{prefix}: license.url must be an absolute http(s) URL when provided.")
+    if not source.collection_date.strip():
+        errors.append(f"{prefix}: collection_date is required.")
+    if not source.version_or_snapshot.strip():
+        errors.append(f"{prefix}: version_or_snapshot is required.")
     if not source.document_formats:
         errors.append(f"{prefix}: at least one document format is required.")
     for document_format in source.document_formats:
@@ -219,4 +227,3 @@ def _optional_string(value: object) -> str | None:
 def _is_valid_http_url(value: str) -> bool:
     parsed = urlparse(value)
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
-
