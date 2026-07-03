@@ -75,6 +75,13 @@ from cangovlm.data.source_registry import (
     load_source_registry,
     validate_sources,
 )
+from cangovlm.data.single_document_pipeline import (
+    CanadaCaSingleDocumentPipeline,
+    SingleDocumentPipelineResult,
+    build_extracted_manifest_record,
+    validate_single_document_pipeline_output,
+    write_extracted_text,
+)
 
 __all__ = [
     "ACQUIRABLE_DOCUMENT_FORMATS",
@@ -96,6 +103,7 @@ __all__ = [
     "CANADA_CA_SOURCE_ID",
     "CANADA_CA_TERMS_URL",
     "CanadaCaAcquisitionClient",
+    "CanadaCaSingleDocumentPipeline",
     "DownloadManifestRecord",
     "HttpResponse",
     "HttpTransport",
@@ -124,6 +132,7 @@ __all__ = [
     "SourceRegistryError",
     "SourceValidationError",
     "StoredRawDocument",
+    "SingleDocumentPipelineResult",
     "TermsNotAcknowledgedError",
     "TransportError",
     "TxtExtractor",
@@ -144,4 +153,7 @@ __all__ = [
     "validate_manifest_records",
     "write_manifest",
     "write_raw_document",
+    "build_extracted_manifest_record",
+    "validate_single_document_pipeline_output",
+    "write_extracted_text",
 ]
