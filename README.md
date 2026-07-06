@@ -8,7 +8,7 @@
 
 </p>
 
-CanGovLM is a tiny decoder-only Transformer language model built entirely from scratch using official Canadian government data.
+CanGovLM is a decoder-only Transformer language model built from scratch using official Canadian government data.
 
 The objective of this project is to understand and implement every core component of a modern language model, including tokenization, data processing, model architecture, training, evaluation, and inference—without using pretrained weights or existing large language models.
 
