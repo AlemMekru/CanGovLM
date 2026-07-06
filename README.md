@@ -25,7 +25,7 @@ The project is developed incrementally as an educational, research, and portfoli
 
 ## Current Status
 
-Current milestone: **Phase 4 – First Production Corpus**
+Current milestone: **Phase 5 – Transformer Implementation**
 
 Completed:
 
@@ -40,20 +40,47 @@ Completed:
 - ✅ Document manifest framework
 - ✅ Document extraction framework
 - ✅ HTML extractor
+- ✅ Canada.ca acquisition client
 - ✅ End-to-end single-document pipeline
-- ✅ 99 automated tests
+- ✅ Immutable corpus snapshot architecture
+- ✅ Transformer configuration
+- ✅ Token embedding layer
+- ✅ Positional embedding layer
+- ✅ Layer normalization
+- ✅ Multi-head self-attention
+- ✅ 180 automated tests
 
 ## Roadmap
 
 - ✅ Project setup
 - ✅ Tokenizer
 - ✅ Corpus pipeline
-- ⏳ Corpus Snapshot v0.1
-- ⏳ Transformer
+- ✅ Initial production corpus pipeline
+- ⏳ Feed-forward network
+- ⏳ Transformer block
+- ⏳ Decoder-only Transformer
 - ⏳ Model pretraining
 - ⏳ Evaluation
 - ⏳ Inference
-- ⏳ Demo
+- ⏳ Demo. 
+
+## Transformer Progress
+
+Completed:
+
+- ✅ Transformer configuration
+- ✅ Token embedding
+- ✅ Positional embedding
+- ✅ Layer normalization
+- ✅ Multi-head self-attention
+
+Remaining:
+
+- ⏳ Feed-forward network
+- ⏳ Transformer block
+- ⏳ Decoder-only Transformer
+- ⏳ Training
+- ⏳ Text generation
 
 ## Features
 
