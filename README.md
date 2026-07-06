@@ -80,7 +80,15 @@ Remaining:
 - ⏳ Transformer block
 - ⏳ Decoder-only Transformer
 - ⏳ Training
-- ⏳ Text generation
+- ⏳ Text generation. 
+
+## Architecture
+
+<p align="center">
+  <img src="assets/architecture.png" alt="CanGovLM Architecture" width="900">
+</p>
+
+The diagram above summarizes the end-to-end CanGovLM pipeline, from official Canadian government data acquisition through corpus preparation, tokenization, Transformer architecture, training, evaluation, and inference.
 
 ## Features
 
