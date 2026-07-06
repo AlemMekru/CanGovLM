@@ -17,6 +17,10 @@ from cangovlm.model.config import (
     validate_transformer_config,
     write_transformer_config,
 )
+from cangovlm.model.attention import (
+    MultiHeadSelfAttention,
+    MultiHeadSelfAttentionError,
+)
 from cangovlm.model.embeddings import (
     PositionalEmbedding,
     PositionalEmbeddingError,
@@ -40,6 +44,8 @@ __all__ = [
     "TransformerConfigError",
     "LayerNorm",
     "LayerNormError",
+    "MultiHeadSelfAttention",
+    "MultiHeadSelfAttentionError",
     "PositionalEmbedding",
     "PositionalEmbeddingError",
     "TokenEmbedding",
