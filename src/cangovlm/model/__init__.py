@@ -5,6 +5,7 @@ from cangovlm.model.config import (
     DEFAULT_DROPOUT_PROBABILITY,
     DEFAULT_EMBEDDING_DIM,
     DEFAULT_FEED_FORWARD_DIM,
+    DEFAULT_LAYER_NORM_EPSILON,
     DEFAULT_NUM_ATTENTION_HEADS,
     DEFAULT_NUM_LAYERS,
     DEFAULT_TRANSFORMER_CONFIG,
@@ -22,12 +23,14 @@ from cangovlm.model.embeddings import (
     TokenEmbedding,
     TokenEmbeddingError,
 )
+from cangovlm.model.normalization import LayerNorm, LayerNormError
 
 __all__ = [
     "DEFAULT_CONTEXT_LENGTH",
     "DEFAULT_DROPOUT_PROBABILITY",
     "DEFAULT_EMBEDDING_DIM",
     "DEFAULT_FEED_FORWARD_DIM",
+    "DEFAULT_LAYER_NORM_EPSILON",
     "DEFAULT_NUM_ATTENTION_HEADS",
     "DEFAULT_NUM_LAYERS",
     "DEFAULT_TRANSFORMER_CONFIG",
@@ -35,6 +38,8 @@ __all__ = [
     "DEFAULT_WEIGHT_INIT_STD",
     "TransformerConfig",
     "TransformerConfigError",
+    "LayerNorm",
+    "LayerNormError",
     "PositionalEmbedding",
     "PositionalEmbeddingError",
     "TokenEmbedding",

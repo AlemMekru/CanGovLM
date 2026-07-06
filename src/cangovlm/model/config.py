@@ -21,6 +21,7 @@ DEFAULT_NUM_LAYERS = 4
 DEFAULT_NUM_ATTENTION_HEADS = 4
 DEFAULT_DROPOUT_PROBABILITY = 0.1
 DEFAULT_WEIGHT_INIT_STD = 0.02
+DEFAULT_LAYER_NORM_EPSILON = 1e-5
 
 
 class TransformerConfigError(ValueError):
@@ -43,6 +44,7 @@ class TransformerConfig:
     num_attention_heads: int = DEFAULT_NUM_ATTENTION_HEADS
     dropout_probability: float = DEFAULT_DROPOUT_PROBABILITY
     weight_init_std: float = DEFAULT_WEIGHT_INIT_STD
+    layer_norm_epsilon: float = DEFAULT_LAYER_NORM_EPSILON
 
     def __post_init__(self) -> None:
         validate_transformer_config(self)
@@ -144,6 +146,7 @@ def validate_transformer_config(config: TransformerConfig) -> None:
     _validate_positive_int("num_attention_heads", config.num_attention_heads)
     _validate_probability("dropout_probability", config.dropout_probability)
     _validate_positive_float("weight_init_std", config.weight_init_std)
+    _validate_positive_float("layer_norm_epsilon", config.layer_norm_epsilon)
 
     if config.num_attention_heads > config.embedding_dim:
         raise TransformerConfigError("num_attention_heads cannot exceed embedding_dim")

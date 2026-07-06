@@ -26,6 +26,7 @@ class TransformerConfigTests(TestCase):
         self.assertEqual(config.num_attention_heads, 4)
         self.assertEqual(config.dropout_probability, 0.1)
         self.assertEqual(config.weight_init_std, 0.02)
+        self.assertEqual(config.layer_norm_epsilon, 1e-5)
         self.assertEqual(config.head_dim, 32)
         self.assertTrue(config.has_valid_attention_dimensions)
         self.assertEqual(config.parameter_sanity_checks, ())
@@ -47,6 +48,7 @@ class TransformerConfigTests(TestCase):
             num_attention_heads=6,
             dropout_probability=0.0,
             weight_init_std=0.01,
+            layer_norm_epsilon=1e-6,
         )
 
         self.assertEqual(config.head_dim, 16)
@@ -63,6 +65,7 @@ class TransformerConfigTests(TestCase):
             num_attention_heads=8,
             dropout_probability=0.2,
             weight_init_std=0.015,
+            layer_norm_epsilon=1e-6,
         )
 
         loaded = TransformerConfig.from_dict(config.to_dict())
@@ -119,6 +122,12 @@ class TransformerConfigTests(TestCase):
             with self.subTest(value=value):
                 with self.assertRaises(TransformerConfigError):
                     TransformerConfig(weight_init_std=value)
+
+    def test_rejects_invalid_layer_norm_epsilon(self) -> None:
+        for value in (0.0, -0.1, "1e-5"):
+            with self.subTest(value=value):
+                with self.assertRaises(TransformerConfigError):
+                    TransformerConfig(layer_norm_epsilon=value)
 
     def test_rejects_attention_dimensions_that_do_not_divide_evenly(self) -> None:
         with self.assertRaises(TransformerConfigError) as context:
