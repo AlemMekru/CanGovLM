@@ -101,7 +101,7 @@ The diagram above summarizes the end-to-end CanGovLM pipeline, from official Can
 - Immutable corpus snapshots
 - HTML acquisition and extraction pipeline
 - End-to-end acquisition → extraction workflow
-- Comprehensive automated test suite (99+ tests)
+- Comprehensive automated test suite (180 tests)
 - No pretrained tokenizer libraries
 - No pretrained language model weights
 
